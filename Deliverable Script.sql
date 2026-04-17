@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS Students (
 StudentID VARCHAR(5) PRIMARY KEY,
 FirstName VARCHAR(20),
 LastName VARCHAR(20),
-Email VARCHAR(60), UNIQUE
+Email VARCHAR(60) UNIQUE,
 AGE INTEGER,
 Year VARCHAR(10) CHECK (Year IN ('freshman', 'sophomore', 'junior', 'senior')),
 CHECK (Email LIKE '%@%.%')
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS Tutors (
 TutorID VARCHAR(5) PRIMARY KEY,
 FirstName VARCHAR(20),
 LastName VARCHAR(20),
-Email VARCHAR(60), UNIQUE
-HourlyRate INTEGER
+Email VARCHAR(60) UNIQUE,
+HourlyRate INTEGER,
 CHECK (Email LIKE '%@%.%')
 );
 
@@ -34,7 +34,7 @@ Length INTEGER CHECK (Length >=0 AND Length <= 600),
 Location VARCHAR(20), /*Should this be constrained to certain locations? */
 ScheduledStatues BOOLEAN,
 TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
-StudentID VARCHAR(5) REFERENCES Students(StudentID)
+StudentID VARCHAR(5) REFERENCES Students(StudentID),
 CHECK (Location IN ('library', 'online', 'study_room'))
 );
 
@@ -49,7 +49,7 @@ StudentID VARCHAR(5) REFERENCES Students(StudentID)
 CREATE TABLE IF NOT EXISTS Enrollment (
 CourseID VARCHAR(5) REFERENCES Courses(CourseID),
 StudentID VARCHAR(5) REFERENCES Students(StudentID),
-EnrollmentStatus BOOLEAN,
+EnrollmentStatus VARCHAR(15),
 PRIMARY KEY (CourseID, StudentID)
 );
 
