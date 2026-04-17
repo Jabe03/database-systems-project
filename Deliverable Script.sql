@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS Students (
 StudentID VARCHAR(5) PRIMARY KEY,
 FirstName VARCHAR(20),
 LastName VARCHAR(20),
-Email VARCHAR(30), 
+Email VARCHAR(60), 
 AGE INTEGER,
 Year VARCHAR(10) CHECK (Year IN ('freshman', 'sophomore', 'junior', 'senior'))
 );
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS Tutors (
 TutorID VARCHAR(5) PRIMARY KEY,
 FirstName VARCHAR(20),
 LastName VARCHAR(20),
-Email VARCHAR(20), 
+Email VARCHAR(60), 
 HourlyRate INTEGER
 );
 
