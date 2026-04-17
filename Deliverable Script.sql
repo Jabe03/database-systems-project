@@ -154,11 +154,45 @@ INSERT INTO Qualification VALUES
 ('0005', '0003'),
 ('0004', '0002');
 
+/* Create Roles for users (Role Based Access Control from slides)*/
+ 
+CREATE ROLE student;
+CREATE ROLE tutor;
+CREATE ROLE university_admin;
+CREATE ROLE tutor_manager;
 
-/*Create Users*/ 
-CREATE USER 'tutor_manager'@'localhost' IDENTIFIED BY 'tutor_manager123';
-CREATE USER 'university_administrator'@'localhost' IDENTIFIED BY 'university_administrator123';
-CREATE USER 'tutor'@'localhost' IDENTIFIED BY 'tutor123';
-CREATE USER 'student'@'localhost' IDENTIFIED BY 'student123';
+/* Add permissions to roles */
 
-/* TODO - Add permissions */
+GRANT SELECT ON Enrollment TO student;
+GRANT SELECT ON Availability TO student;
+GRANT INSERT ON Review TO student;
+GRANT INSERT ON TutorSession TO student;
+GRANT INSERT ON SessionCourse TO student;
+
+GRANT SELECT ON Review TO tutor;
+GRANT SELECT, INSERT, UPDATE ON Availability TO tutor;
+GRANT SELECT ON TutorSession TO tutor;
+GRANT SELECT ON Teaches TO tutor;
+
+GRANT SELECT, INSERT, UPDATE ON Students TO university_admin;
+GRANT SELECT, INSERT, UPDATE ON Courses TO university_admin;
+GRANT SELECT ON Enrollment TO university_admin;
+GRANT SELECT ON Teaches TO university_admin;
+
+GRANT SELECT, INSERT, UPDATE ON Tutors TO tutor_manager;
+GRANT SELECT ON Review TO tutor_manager;
+GRANT SELECT, INSERT, UPDATE ON Qualification TO tutor_manager;
+GRANT SELECT ON Availability TO tutor_manager;
+GRANT SELECT, INSERT, UPDATE ON Teaches TO tutor_manager;
+
+/*Create Dummy Users*/ 
+CREATE USER 'tutor_manager1'@'localhost' IDENTIFIED BY 'tutor_manager123';
+CREATE USER 'university_administrator1'@'localhost' IDENTIFIED BY 'university_administrator123';
+CREATE USER 'tutor1'@'localhost' IDENTIFIED BY 'tutor123';
+CREATE USER 'student1'@'localhost' IDENTIFIED BY 'student123';
+
+/* Grant them designated roles */
+GRANT tutor_manager TO 'tutor_manager1'@'localhost'
+GRANT university_administrator TO 'university_administrator1'@'localhost'
+GRANT tutor TO 'tutor1'@'localhost'
+GRANT student TO 'student1'@'localhost'
