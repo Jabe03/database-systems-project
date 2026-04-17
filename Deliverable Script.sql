@@ -155,7 +155,11 @@ INSERT INTO Qualification VALUES
 ('0004', '0002');
 
 /* Create Roles for users (Role Based Access Control from slides)*/
- 
+DROP ROLE IF EXISTS student;
+DROP ROLE IF EXISTS tutor;
+DROP ROLE IF EXISTS university_admin;
+DROP ROLE IF EXISTS tutor_manager;
+
 CREATE ROLE student;
 CREATE ROLE tutor;
 CREATE ROLE university_admin;
@@ -186,10 +190,10 @@ GRANT SELECT ON Availability TO tutor_manager;
 GRANT SELECT, INSERT, UPDATE ON Teaches TO tutor_manager;
 
 /*Create Dummy Users*/ 
-CREATE USER 'tutor_manager1'@'localhost' IDENTIFIED BY 'tutor_manager123';
-CREATE USER 'university_administrator1'@'localhost' IDENTIFIED BY 'university_administrator123';
-CREATE USER 'tutor1'@'localhost' IDENTIFIED BY 'tutor123';
-CREATE USER 'student1'@'localhost' IDENTIFIED BY 'student123';
+CREATE USER IF NOT EXISTS 'tutor_manager1'@'localhost' IDENTIFIED BY 'tutor_manager123';
+CREATE USER IF NOT EXISTS 'university_administrator1'@'localhost' IDENTIFIED BY 'university_administrator123';
+CREATE USER IF NOT EXISTS 'tutor1'@'localhost' IDENTIFIED BY 'tutor123';
+CREATE USER IF NOT EXISTS 'student1'@'localhost' IDENTIFIED BY 'student123';
 
 /* Grant them designated roles */
 GRANT tutor_manager TO 'tutor_manager1'@'localhost';
