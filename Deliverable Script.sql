@@ -1,9 +1,8 @@
-CREATE DATABASE TutorSystem;
+CREATE DATABASE IF NOT EXISTS TutorSystem;
 USE TutorSystem;
 
-
 /*Create Tables*/
-CREATE TABLE Students (
+CREATE TABLE IF NOT EXISTS Students (
 StudentID VARCHAR(5) PRIMARY KEY,
 FirstName VARCHAR(20),
 LastName VARCHAR(20),
@@ -12,13 +11,13 @@ AGE INTEGER,
 Year VARCHAR(10) CHECK (Year IN ('freshman', 'sophomore', 'junior', 'senior'))
 );
 
-CREATE TABLE Courses ( 
+CREATE TABLE IF NOT EXISTS Courses ( 
 CourseID VARCHAR(5) PRIMARY KEY,
 CourseName VARCHAR(30),
 CreditHours INTEGER CHECK (CreditHours >= 0 AND CreditHours <= 4)
 );
 
-CREATE TABLE Tutors (
+CREATE TABLE IF NOT EXISTS Tutors (
 TutorID VARCHAR(5) PRIMARY KEY,
 FirstName VARCHAR(20),
 LastName VARCHAR(20),
@@ -26,7 +25,7 @@ Email VARCHAR(20),
 HourlyRate INTEGER
 );
 
-CREATE TABLE TutorSession ( 
+CREATE TABLE IF NOT EXISTS TutorSession ( 
 SessionID VARCHAR(5) PRIMARY KEY,
 SessionDate DATE,
 Length INTEGER CHECK (Length >=0 AND Length <= 600),
@@ -36,7 +35,7 @@ TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
 StudentID VARCHAR(5) REFERENCES Students(StudentID)
 );
 
-CREATE TABLE Review (
+CREATE TABLE IF NOT EXISTS Review (
 ReviewID VARCHAR(5) PRIMARY KEY,
 Rating INT CHECK (Rating >= 1 AND Rating <= 5),
 COMMENT VARCHAR(1000),
@@ -44,7 +43,7 @@ TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
 StudentID VARCHAR(5) REFERENCES Students(StudentID)
 );
 
-CREATE TABLE Enrollment (
+CREATE TABLE IF NOT EXISTS Enrollment (
 CourseID VARCHAR(5) REFERENCES Courses(CourseID),
 StudentID VARCHAR(5) REFERENCES Students(StudentID),
 GRADE VARCHAR(1),
@@ -52,25 +51,25 @@ EnrollmentStatus BOOLEAN,
 PRIMARY KEY (CourseID, StudentID)
 );
 
-CREATE TABLE Teaches (
+CREATE TABLE IF NOT EXISTS Teaches (
 TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
 CourseID VARCHAR(5) REFERENCES Courses(CourseID),
 PRIMARY KEY (CourseID, TutorID)
 );
 
-CREATE TABLE SessionCourse (
+CREATE TABLE IF NOT EXISTS SessionCourse (
 SessionID VARCHAR(5) REFERENCES TutorSession(SessionID),
 CourseID VARCHAR(5) REFERENCES Courses(CourseID),
 PRIMARY KEY (CourseID, SessionID)
 );
 
-CREATE TABLE Availability(
+CREATE TABLE IF NOT EXISTS Availability(
 TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
 AvailableTime INTEGER, /* Need to clarify this */
 PRIMARY KEY (TutorID)
 );
 
-CREATE TABLE Qualification (
+CREATE TABLE IF NOT EXISTS Qualification (
 TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
 CourseID VARCHAR(5) REFERENCES Courses(CourseID),
 PRIMARY KEY (TutorID, CourseID)
