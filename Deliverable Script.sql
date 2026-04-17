@@ -192,7 +192,7 @@ CREATE USER 'tutor1'@'localhost' IDENTIFIED BY 'tutor123';
 CREATE USER 'student1'@'localhost' IDENTIFIED BY 'student123';
 
 /* Grant them designated roles */
-GRANT tutor_manager TO 'tutor_manager1'@'localhost'
-GRANT university_administrator TO 'university_administrator1'@'localhost'
-GRANT tutor TO 'tutor1'@'localhost'
-GRANT student TO 'student1'@'localhost'
+GRANT tutor_manager TO 'tutor_manager1'@'localhost';
+GRANT university_admin TO 'university_administrator1'@'localhost';
+GRANT tutor TO 'tutor1'@'localhost';
+GRANT student TO 'student1'@'localhost';
