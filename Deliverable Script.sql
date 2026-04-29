@@ -4,12 +4,12 @@ USE TutorSystem;
 /*Create Tables*/
 CREATE TABLE IF NOT EXISTS Students (
 StudentID VARCHAR(5) PRIMARY KEY,
-FirstName VARCHAR(20),
-LastName VARCHAR(20),
-Email VARCHAR(60) UNIQUE,
+FirstName VARCHAR(20) NOT NULL,
+LastName VARCHAR(20) NOT NULL,
+Email VARCHAR(60) UNIQUE NOT NULL,
 AGE INTEGER,
 Year VARCHAR(10) CHECK (Year IN ('freshman', 'sophomore', 'junior', 'senior')),
-CHECK (Email LIKE '%@%.%')
+CHECK (Email LIKE '%@uiowa.edu')
 );
 
 CREATE TABLE IF NOT EXISTS Courses ( 
@@ -20,9 +20,9 @@ CreditHours INTEGER CHECK (CreditHours >= 0 AND CreditHours <= 4)
 
 CREATE TABLE IF NOT EXISTS Tutors (
 TutorID VARCHAR(5) PRIMARY KEY,
-FirstName VARCHAR(20),
-LastName VARCHAR(20),
-Email VARCHAR(60) UNIQUE,
+FirstName VARCHAR(20) NOT NULL,
+LastName VARCHAR(20) NOT NULL,
+Email VARCHAR(60) UNIQUE NOT NULL,
 HourlyRate INTEGER,
 CHECK (Email LIKE '%@%.%')
 );
@@ -31,10 +31,12 @@ CREATE TABLE IF NOT EXISTS TutorSession (
 SessionID VARCHAR(5) PRIMARY KEY,
 SessionDate DATE,
 Length INTEGER CHECK (Length >=0 AND Length <= 600),
-Location VARCHAR(20), /*Should this be constrained to certain locations? */
-ScheduledStatues BOOLEAN,
-TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
-StudentID VARCHAR(5) REFERENCES Students(StudentID),
+Location VARCHAR(20), 
+ScheduledStatus BOOLEAN DEFAULT TRUE,
+TutorID VARCHAR(5),
+StudentID VARCHAR(5),
+FOREIGN KEY (TutorID) REFERENCES Tutors(TutorID) ON DELETE CASCADE,
+FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE,
 CHECK (Location IN ('library', 'online', 'study_room'))
 );
 
@@ -42,38 +44,50 @@ CREATE TABLE IF NOT EXISTS Review (
 ReviewID VARCHAR(5) PRIMARY KEY,
 Rating INT CHECK (Rating >= 1 AND Rating <= 5),
 COMMENT VARCHAR(1000),
-TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
-StudentID VARCHAR(5) REFERENCES Students(StudentID)
+TutorID VARCHAR(5),
+StudentID VARCHAR(5),
+FOREIGN KEY (TutorID) REFERENCES Tutors(TutorID) ON DELETE CASCADE,
+FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Enrollment (
-CourseID VARCHAR(5) REFERENCES Courses(CourseID),
-StudentID VARCHAR(5) REFERENCES Students(StudentID),
-EnrollmentStatus VARCHAR(15),
-PRIMARY KEY (CourseID, StudentID)
+CourseID VARCHAR(5),
+StudentID VARCHAR(5),
+EnrollmentStatus VARCHAR(15) CHECK (EnrollmentStatus IN ('enrolled', 'completed', 'dropped')),
+Grade VARCHAR(2),
+PRIMARY KEY (CourseID, StudentID),
+FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE,
+FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Teaches (
-TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
-CourseID VARCHAR(5) REFERENCES Courses(CourseID),
+TutorID VARCHAR(5),
+CourseID VARCHAR(5),
+FOREIGN KEY (TutorID) REFERENCES Tutors(TutorID) ON DELETE CASCADE,
+FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE,
 PRIMARY KEY (CourseID, TutorID)
 );
 
 CREATE TABLE IF NOT EXISTS SessionCourse (
-SessionID VARCHAR(5) REFERENCES TutorSession(SessionID),
-CourseID VARCHAR(5) REFERENCES Courses(CourseID),
+SessionID VARCHAR(5),
+CourseID VARCHAR(5),
+FOREIGN KEY (SessionID) REFERENCES TutorSession(SessionID) ON DELETE CASCADE,
+FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE,
 PRIMARY KEY (CourseID, SessionID)
 );
 
 CREATE TABLE IF NOT EXISTS Availability(
-TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
-AvailableTime DATETIME, 
-PRIMARY KEY (TutorID)
+TutorID VARCHAR(5),
+AvailableTime DATETIME,
+PRIMARY KEY (TutorID, AvailableTime),
+FOREIGN KEY (TutorID) REFERENCES Tutors(TutorID) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Qualification (
-TutorID VARCHAR(5) REFERENCES Tutors(TutorID),
-CourseID VARCHAR(5) REFERENCES Courses(CourseID),
+TutorID VARCHAR(5),
+CourseID VARCHAR(5),
+FOREIGN KEY (TutorID) REFERENCES Tutors(TutorID) ON DELETE CASCADE,
+FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE,
 PRIMARY KEY (TutorID, CourseID)
 );
 
@@ -121,19 +135,19 @@ INSERT INTO Review VALUES
 
 /* Enrollment */
 INSERT INTO Enrollment VALUES
-('C101','S001','enrolled'),
-('C102','S002','enrolled'),
-('C103','S003','dropped'),
-('C104','S004','enrolled'),
-('C105','S005','completed');
+('C101','S001','enrolled',NULL),
+('C101','S002','completed','A'),
+('C102','S002','enrolled',NULL),
+('C102','S001','completed','B'),
+('C103','S003','dropped',NULL);
 
 /* Teaches */
 INSERT INTO Teaches VALUES
 ('T001','C101'),
+('T001','C102'),
+('T001','C103'),
 ('T002','C102'),
-('T003','C103'),
-('T004','C104'),
-('T005','C105');
+('T003','C103');
 
 /* SessionCourse */
 INSERT INTO SessionCourse VALUES
@@ -146,10 +160,10 @@ INSERT INTO SessionCourse VALUES
 /* Availability */
 INSERT INTO Availability VALUES
 ('T001','2026-04-10 10:00:00'),
+('T001','2026-04-10 14:00:00'),
 ('T002','2026-04-11 11:00:00'),
 ('T003','2026-04-12 12:00:00'),
-('T004','2026-04-13 13:00:00'),
-('T005','2026-04-14 14:00:00');
+('T004','2026-04-13 13:00:00');
 
 /* Qualification */
 INSERT INTO Qualification VALUES
