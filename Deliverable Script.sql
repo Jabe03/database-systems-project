@@ -279,3 +279,46 @@ BEGIN
     END IF;
 END; //
 DELIMITER ;
+
+/* Testing Trigger --> enforceValidReviews */
+/* This should fail since S003 never had a session with T001. */
+INSERT INTO Review VALUES
+('R999', 5, 'Great tutor!', 'T001', 'S003');
+
+/* Queries */
+/* Join */
+/* Getting all tutoring sessions with student + tutor names */
+SELECT ts.SessionID, ts.SessionDate, 
+       s.FirstName AS StudentFirstName, s.LastName AS StudentLastName,
+       t.FirstName AS TutorFirstName, t.LastName AS TutorLastName
+FROM TutorSession ts
+JOIN Students s ON ts.StudentID = s.StudentID
+JOIN Tutors t ON ts.TutorID = t.TutorID;
+
+/* join + aggregation */
+/* Average rating per tutor */
+SELECT T.TutorID, T.FirstName, T.LastName,
+       AVG(R.Rating) AS AvgRating
+FROM Tutors T
+JOIN Review R ON T.TutorID = R.TutorID
+GROUP BY T.TutorID, T.FirstName, T.LastName;
+
+/* Join */
+/* The courses each tutor teaches */
+SELECT T.FirstName, T.LastName, C.CourseName
+FROM Tutors T
+JOIN Teaches Te ON T.TutorID = Te.TutorID
+JOIN Courses C ON Te.CourseID = C.CourseID;
+
+/* Subquery */
+/* The students who are enrolled in at least one course */
+SELECT FirstName, LastName
+FROM Students
+WHERE StudentID IN (
+    SELECT StudentID FROM Enrollment
+);
+
+/* Uses a view + aggregation */
+SELECT * 
+FROM tutorPerformance
+WHERE AverageRating >= 4;
