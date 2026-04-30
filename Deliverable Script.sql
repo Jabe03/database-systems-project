@@ -349,7 +349,7 @@ DELIMITER ;
 /* Sample call*/
 CALL ScheduleTutoringSession('SS006', '2026-05-01', 60, 'online', 'T001', 'S002', 'C101');
 SELECT * FROM tutorsession;
-SELECT * FROM sessioncourse
+SELECT * FROM sessioncourse;
 
 /* Finds how many tutors are qualified for a certain course */
 DELIMITER //
