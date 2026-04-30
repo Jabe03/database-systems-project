@@ -219,3 +219,23 @@ GRANT tutor_manager TO 'tutor_manager1'@'localhost';
 GRANT university_admin TO 'university_administrator1'@'localhost';
 GRANT tutor TO 'tutor1'@'localhost';
 GRANT student TO 'student1'@'localhost';
+
+/* Views */
+CREATE VIEW tutorPerformance AS
+SELECT T.TutorID, T.FirstName, T.LastName, T.HourlyRate, ROUND(AVG(R.Rating), 2) AS AverageRating, COUNT(R.ReviewID) AS TotalReviews
+FROM Tutors T LEFT JOIN Review R ON T.TutorID = R.TutorID
+GROUP BY 
+    T.TutorID, 
+    T.FirstName, 
+    T.LastName, 
+    T.HourlyRate;
+
+CREATE VIEW sessionDetails AS
+SELECT ts.SessionID, ts.SessionDate, ts.Location, ts.Length AS length, c.CourseName,
+s.FirstName AS studentFName, s.LastName AS studentLName, t.FirstName AS tutorFName, t.LastName AS tutorLName,
+ts.ScheduledStatus
+FROM TutorSession ts
+JOIN Students s ON ts.StudentID = s.StudentID
+JOIN Tutors t ON ts.TutorID = t.TutorID
+JOIN SessionCourse sc ON ts.SessionID = sc.SessionID
+JOIN Courses c ON sc.CourseID = c.CourseID;
