@@ -322,3 +322,54 @@ WHERE StudentID IN (
 SELECT * 
 FROM tutorPerformance
 WHERE AverageRating >= 4;
+
+/* Stored Procedure */
+DELIMITER //
+
+/*Schedules a tutoring session by updating multiple tables*/
+CREATE PROCEDURE ScheduleTutoringSession(
+    IN p_SessionID VARCHAR(5),
+    IN p_SessionDate DATE,
+    IN p_Length INTEGER,
+    IN p_Location VARCHAR(20),
+    IN p_TutorID VARCHAR(5),
+    IN p_StudentID VARCHAR(5),
+    IN p_CourseID VARCHAR(5)
+)
+BEGIN
+    INSERT INTO TutorSession (SessionID, SessionDate, Length, Location, ScheduledStatus, TutorID, StudentID)
+    VALUES (p_SessionID, p_SessionDate, p_Length, p_Location, TRUE, p_TutorID, p_StudentID);
+    
+    INSERT INTO SessionCourse (SessionID, CourseID)
+    VALUES (p_SessionID, p_CourseID);
+END //
+
+DELIMITER ;
+
+/* Sample call*/
+CALL ScheduleTutoringSession('SS006', '2026-05-01', 60, 'online', 'T001', 'S002', 'C101');
+SELECT * FROM tutorsession;
+SELECT * FROM sessioncourse
+
+/* Finds how many tutors are qualified for a certain course */
+DELIMITER //
+
+CREATE FUNCTION CountQualifiedTutors(
+    p_CourseID VARCHAR(5)
+) 
+RETURNS INTEGER
+DETERMINISTIC
+BEGIN
+    DECLARE tutor_count INTEGER DEFAULT 0;
+    SELECT COUNT(*) INTO tutor_count
+    FROM Qualification
+    WHERE CourseID = p_CourseID;
+    RETURN tutor_count;
+END //
+
+DELIMITER ;
+
+/* sample call*/
+SELECT CourseName, CountQualifiedTutors('C101') AS AvailableTutors 
+FROM Courses 
+WHERE CourseID = 'C101';
