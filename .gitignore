@@ -1,2 +1,3 @@
 */.idea
-website/target/
+web_server/target/
+site/node_modules/
