@@ -30,7 +30,7 @@ CHECK (Email LIKE '%@%.%')
 CREATE TABLE IF NOT EXISTS TutorSession ( 
 SessionID VARCHAR(5) PRIMARY KEY,
 SessionDate DATE,
-Length INTEGER CHECK (Length >=0 AND Length <= 600),
+Length INTEGER CHECK (Length >=15 AND Length <= 600),
 Location VARCHAR(20), 
 ScheduledStatus BOOLEAN DEFAULT TRUE,
 TutorID VARCHAR(5),
@@ -239,3 +239,43 @@ JOIN Students s ON ts.StudentID = s.StudentID
 JOIN Tutors t ON ts.TutorID = t.TutorID
 JOIN SessionCourse sc ON ts.SessionID = sc.SessionID
 JOIN Courses c ON sc.CourseID = c.CourseID;
+
+/* Triggers */
+
+DELIMITER //
+CREATE TRIGGER ensureSessionIsAValidDate
+BEFORE INSERT ON TutorSession
+FOR EACH ROW
+BEGIN
+    IF NEW.SessionDate < current_date() THEN
+        SIGNAL SQLSTATE '45000';
+    END IF;
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER formatStudentNames
+BEFORE INSERT ON Students
+FOR EACH ROW
+BEGIN
+    SET NEW.FirstName = CONCAT(UPPER(SUBSTRING(NEW.FirstName, 1, 1)), LOWER(SUBSTRING(NEW.FirstName, 2)));
+    SET NEW.LastName = CONCAT(UPPER(SUBSTRING(NEW.LastName, 1, 1)), LOWER(SUBSTRING(NEW.LastName, 2)));
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER enforceValidReviews
+BEFORE INSERT ON Review
+FOR EACH ROW
+BEGIN
+    DECLARE session_num INT;
+    SELECT COUNT(*) INTO session_num
+    FROM TutorSession
+    WHERE StudentID = NEW.StudentID 
+    AND TutorID = NEW.TutorID;
+
+    IF session_num = 0 THEN
+        SIGNAL SQLSTATE '45000';
+    END IF;
+END; //
+DELIMITER ;
