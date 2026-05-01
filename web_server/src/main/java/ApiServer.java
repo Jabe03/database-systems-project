@@ -9,7 +9,8 @@ public class ApiServer  {
     public static void main(String[] args){
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 8080), 0);
-            server.createContext("/helloWorld", new DatabaseApi());
+            server.createContext("/tutorCount", new HardcodedCount());
+
             server.start();
         } catch (IOException e) {
             e.printStackTrace();
