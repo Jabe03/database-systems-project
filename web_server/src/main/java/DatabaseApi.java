@@ -4,7 +4,6 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.*;
 
 public class DatabaseApi implements HttpHandler {
     static final String url = "jdbc:mysql://localhost:3306/tutorsystem";

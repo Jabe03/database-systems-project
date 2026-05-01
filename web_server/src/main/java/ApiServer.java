@@ -1,4 +1,3 @@
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -10,7 +9,8 @@ public class ApiServer  {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 8080), 0);
             server.createContext("/tutorCount", new HardcodedCount());
-
+            server.createContext("/", new DatabaseApi());
+            
             server.start();
         } catch (IOException e) {
             e.printStackTrace();
