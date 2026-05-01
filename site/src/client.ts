@@ -17,7 +17,7 @@ async function makeRequest(path: string) {
         }
 
         const data = await response.json();
-        
+
         resultDisplay.textContent = JSON.stringify(data, null, 2);
 
     } catch (err: unknown) {

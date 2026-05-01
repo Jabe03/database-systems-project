@@ -36,7 +36,14 @@ public class DatabaseApi implements HttpHandler {
                 sql = "SELECT TutorID, FirstName, LastName, HourlyRate FROM Tutors";
             } else if (path.equals("/performance")) {
                 sql = "SELECT * FROM tutorPerformance";
-            } else {
+            } else if (path.equals("/enrollment")) {
+                sql = "SELECT FirstName, LastName\n" +
+                        "FROM Students\n" +
+                        "WHERE StudentID IN (\n" +
+                        "    SELECT StudentID FROM Enrollment\n" +
+                        ")";
+            }
+            else {
                 jsonResponse = "{\"error\": \"Endpoint not found\"}";
             }
 
@@ -62,6 +69,10 @@ public class DatabaseApi implements HttpHandler {
                         row.put("name", rs.getString("FirstName") + " " + rs.getString("LastName"));
                         row.put("avgRating", rs.getDouble("AverageRating"));
                         row.put("totalReviews", rs.getInt("TotalReviews"));
+                    }
+                    else if (path.equals("/enrollment")) {
+                        row.put("firstname", rs.getString("FirstName"));
+                        row.put("lastname", rs.getString("LastName"));
                     }
 
 

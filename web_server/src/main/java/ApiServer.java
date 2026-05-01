@@ -12,6 +12,7 @@ public class ApiServer  {
             DatabaseApi apiHandler = new DatabaseApi();
             server.createContext("/tutors", apiHandler);
             server.createContext("/performance", apiHandler);
+            server.createContext("/enrollment", apiHandler);
 
             server.start();
         } catch (IOException e) {
