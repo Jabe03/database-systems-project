@@ -4,9 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database Systems Project</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #result { margin-top: 20px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; min-height: 50px; }
+    </style>
 </head>
 <body>
-<h1>Test</h1>
+<h1>Database Explorer</h1>
+
+<label for="endpointInput">Enter Endpoint (e.g., helloWorld): </label>
+<input type="text" id="endpointInput" placeholder="helloWorld">
+<button id="fetchButton">Fetch Data</button>
+
+<h3>Result:</h3>
+<pre id="result">Waiting for query...</pre>
 
 <script type="module" src="./dist/client.js"></script>
 </body>

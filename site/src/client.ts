@@ -1,38 +1,46 @@
-export {};
-
-import readline from "readline";
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
 const BASE_URL = "http://localhost:8080/";
 
+const fetchButton = document.getElementById("fetchButton") as HTMLButtonElement;
+const endpointInput = document.getElementById("endpointInput") as HTMLInputElement;
+const resultDisplay = document.getElementById("result") as HTMLPreElement;
+
 async function makeRequest(path: string) {
-  try {
-    const url = BASE_URL + path;
-    const response = await fetch(url);
+    try {
+        const url = BASE_URL + path;
+        resultDisplay.textContent = "Loading...";
 
-    const text = await response.text();
-    console.log(`\nResponse from ${url}:`);
-    console.log(text);
-  } catch (err) {
-    console.error("Request failed:", err);
-  }
-}
 
-function prompt() {
-  rl.question("\nEnter endpoint (or 'exit'): ", async (input: string) => {
-    if (input === "exit") {
-      rl.close();
-      return;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        resultDisplay.textContent = JSON.stringify(data, null, 2);
+
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            resultDisplay.textContent = "Request failed: " + err.message;
+        } else {
+            resultDisplay.textContent = "An unknown error occurred.";
+        }
+        console.error("Fetch error:", err);
     }
-
-    await makeRequest(input);
-    prompt();
-  });
 }
 
-console.log("HTTP REPL: Type endpoints like 'helloWorld'");
-prompt();
+fetchButton.addEventListener("click", () => {
+    const endpoint = endpointInput.value.trim();
+    if (endpoint) {
+        makeRequest(endpoint);
+    } else {
+        resultDisplay.textContent = "Please enter an endpoint.";
+    }
+});
+
+endpointInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+        fetchButton.click();
+    }
+});
