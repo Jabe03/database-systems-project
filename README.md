@@ -16,10 +16,21 @@ In order to run the website, you need (in order)
 4) Website active
    - With typescript code making requests to the java API for SQL commands
 
+## Hardcoded example
+Currently, there is a hardcoded example of a handling of a request and call to a handler for that request
+Call chain: 
+1) typescript `client.ts` sends http message to `localhost:8080` with a string identifying the "end point" (the web page/data we actually want)
+2) The Java `ApiServer.java` recieves the http message and, if the route is registered (eg `localhost:8080/tutorCount`), it calls the `handle()` method that was given by `server.createContext()` when creating the server.
+3) The handle method must make a connection to the database, build a quesry, then execute that query. Then, it writes an http message back (via `sendJson()`) containing whatever it wants (currently it just sends a JSON like `{"qualified_tutor_count" : "1"}`)
 
 ## TODO
 - ~~Set up connection between Java API and typescript requests~~
 - Make HTML for website
+   - Index page that shows all of the tables
+   - Want a page that shows each table 
+      - Want to be able to edit, delete, add rows to table
+   - Want to show off our functions/procedures
 - Design request-response protocol for website
   - Enumerate all database commands we want to implement
   - Provide explicit support for these commands
+
