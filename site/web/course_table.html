@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Courses Table</title>
+</head>
+<body>
+    <h1>Courses</h1>
+
+    <p><a href="index.html">Back to index</a></p>
+
+    <button id="refreshButton">Refresh Courses</button>
+
+    <h2>Current Courses</h2>
+    <div id="tableContainer"></div>
+
+    <h2>Create New Course</h2>
+
+    <form id="createCourseForm">
+        <label>CourseID: <input name="CourseID" required></label><br>
+        <label>CourseName: <input name="CourseName" required></label><br>
+        <label>CreditHours: <input name="CreditHours" required></label><br>
+
+        <button type="submit">Create Course</button>
+    </form>
+
+    <h2>Raw Response</h2>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { makeRequest, renderTable } from "./scripts/database_page.js";
+
+        const courseConfig = {
+            tableName: "Courses",
+            primaryKey: "CourseID",
+            containerId: "tableContainer",
+
+            onEdit: async function (courseId, columns, row) {
+                const currentName = row[columns.indexOf("CourseName")];
+                const newName = prompt("Enter new course name:", currentName);
+
+                if (!newName) return;
+
+                await makeRequest("POST Courses/" + courseId + " " + JSON.stringify({
+                    CourseName: newName
+                }));
+
+                await loadCourses();
+            },
+
+            onDelete: async function (courseId) {
+                await makeRequest("DELETE Courses/" + courseId);
+                await loadCourses();
+            }
+        };
+
+        async function loadCourses() {
+            const data = await makeRequest("GET Courses");
+            renderTable(data, courseConfig);
+        }
+
+        document.getElementById("refreshButton").addEventListener("click", loadCourses);
+
+        document.getElementById("createCourseForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+
+            const body = {
+                CourseID: formData.get("CourseID"),
+                CourseName: formData.get("CourseName"),
+                CreditHours: formData.get("CreditHours")
+            };
+
+            await makeRequest("POST Courses " + JSON.stringify(body));
+
+            event.target.reset();
+            await loadCourses();
+        });
+
+        loadCourses();
+    </script>
+</body>
+</html>

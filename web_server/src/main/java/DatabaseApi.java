@@ -17,7 +17,14 @@ public class DatabaseApi implements HttpHandler {
     @Override
     public void handle(HttpExchange http) {
         addHeaders(http);
-
+        if (http.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+            try {
+                http.sendResponseHeaders(204, -1);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
         if (http.getRequestMethod().equalsIgnoreCase("GET")) {
             handleGet(http);
         } else if (http.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -31,9 +38,9 @@ public class DatabaseApi implements HttpHandler {
 
 
     private void addHeaders(HttpExchange http) {
-        http.getResponseHeaders().add("Content-Type", "application/json");
         http.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        http.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        http.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+        http.getResponseHeaders().add("Content-Type", "application/json");
         http.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
     }
     private void handleDelete(HttpExchange http) {

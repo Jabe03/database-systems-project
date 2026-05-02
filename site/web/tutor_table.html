@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tutors Table</title>
+</head>
+<body>
+    <h1>Tutors</h1>
+
+    <p><a href="index.html">Back to index</a></p>
+
+    <button id="refreshButton">Refresh Tutors</button>
+
+    <h2>Current Tutors</h2>
+    <div id="tableContainer"></div>
+
+    <h2>Create New Tutor</h2>
+
+    <form id="createTutorForm">
+        <label>TutorID: <input name="TutorID" required></label><br>
+        <label>FirstName: <input name="FirstName" required></label><br>
+        <label>LastName: <input name="LastName" required></label><br>
+        <label>Email: <input name="Email" required></label><br>
+        <label>HourlyRate: <input name="HourlyRate" type="number" required></label><br>
+
+        <button type="submit">Create Tutor</button>
+    </form>
+
+    <h2>Raw Response</h2>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { makeRequest, renderTable } from "./scripts/database_page.js";
+
+        const tutorConfig = {
+            tableName: "Tutors",
+            primaryKey: "TutorID",
+            containerId: "tableContainer",
+
+            onEdit: async function (tutorId, columns, row) {
+                const currentRate = row[columns.indexOf("HourlyRate")];
+                const newRate = prompt("Enter new hourly rate:", currentRate);
+
+                if (!newRate) return;
+
+                await makeRequest("POST Tutors/" + tutorId + " " + JSON.stringify({
+                    HourlyRate: Number(newRate)
+                }));
+
+                await loadTutors();
+            },
+
+            onDelete: async function (tutorId) {
+                await makeRequest("DELETE Tutors/" + tutorId);
+                await loadTutors();
+            }
+        };
+
+        async function loadTutors() {
+            const data = await makeRequest("GET Tutors");
+            renderTable(data, tutorConfig);
+        }
+
+        document.getElementById("refreshButton").addEventListener("click", loadTutors);
+
+        document.getElementById("createTutorForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+
+            const body = {
+                TutorID: formData.get("TutorID"),
+                FirstName: formData.get("FirstName"),
+                LastName: formData.get("LastName"),
+                Email: formData.get("Email"),
+                HourlyRate: formData.get("HourlyRate")
+            };
+
+            await makeRequest("POST Tutors " + JSON.stringify(body));
+
+            event.target.reset();
+            await loadTutors();
+        });
+
+        loadTutors();
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reviews Table</title>
+</head>
+<body>
+    <h1>Reviews</h1>
+
+    <p><a href="index.html">Back to index</a></p>
+
+    <button id="refreshButton">Refresh Reviews</button>
+
+    <h2>Current Reviews</h2>
+    <div id="tableContainer"></div>
+
+    <h2>Create New Review</h2>
+
+    <form id="createReviewForm">
+        <label>ReviewID: <input name="ReviewID" required></label><br>
+        <label>Rating: <input name="Rating" required></label><br>
+        <label>COMMENT: <input name="COMMENT" required></label><br>
+        <label>TutorID: <input name="TutorID" required></label><br>
+        <label>StudentID: <input name="StudentID" required></label><br>
+
+        <button type="submit">Create Review</button>
+    </form>
+
+    <h2>Raw Response</h2>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { makeRequest, renderTable } from "./scripts/database_page.js";
+
+        const reviewConfig = {
+            tableName: "Review",
+            primaryKey: "ReviewID",
+            containerId: "tableContainer",
+
+            onEdit: async function (reviewId, columns, row) {
+                const currentComment = row[columns.indexOf("COMMENT")];
+                const newComment = prompt("Enter new comment:", currentComment);
+
+                if (!newComment) return;
+
+                await makeRequest("POST Review/" + reviewId + " " + JSON.stringify({
+                    COMMENT: newComment
+                }));
+
+                await loadReviews();
+            },
+
+            onDelete: async function (reviewId) {
+                await makeRequest("DELETE Review/" + reviewId);
+                await loadReviews();
+            }
+        };
+
+        async function loadReviews() {
+            const data = await makeRequest("GET Review");
+            renderTable(data, reviewConfig);
+        }
+
+        document.getElementById("refreshButton").addEventListener("click", loadReviews);
+
+        document.getElementById("createReviewForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+
+            const body = {
+                ReviewID: formData.get("ReviewID"),
+                Rating: formData.get("Rating"),
+                COMMENT: formData.get("COMMENT"),
+                TutorID: formData.get("TutorID"),
+                StudentID: formData.get("StudentID")
+            };
+
+            await makeRequest("POST Review " + JSON.stringify(body));
+
+            event.target.reset();
+            await loadReviews();
+        });
+
+        loadReviews();
+    </script>
+</body>
+</html>

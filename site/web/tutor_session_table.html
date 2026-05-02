@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tutor Sessions Table</title>
+</head>
+<body>
+    <h1>Tutor Sessions</h1>
+
+    <p><a href="index.html">Back to index</a></p>
+
+    <button id="refreshButton">Refresh Tutor Sessions</button>
+
+    <h2>Current Tutor Sessions</h2>
+    <div id="tableContainer"></div>
+
+    <h2>Create New Tutor Session</h2>
+
+    <form id="createTutorSessionForm">
+        <label>SessionID: <input name="SessionID" required></label><br>
+        <label>SessionDate: <input name="SessionDate" placeholder="YYYY-MM-DD" required></label><br>
+        <label>Length: <input name="Length" required></label><br>
+        <label>Location: <input name="Location" required></label><br>
+        <label>ScheduledStatus: <input name="ScheduledStatus" required></label><br>
+        <label>TutorID: <input name="TutorID" required></label><br>
+        <label>StudentID: <input name="StudentID" required></label><br>
+
+        <button type="submit">Create Tutor Session</button>
+    </form>
+
+    <h2>Raw Response</h2>
+    <pre id="result"></pre>
+
+    <script type="module">
+        import { makeRequest, renderTable } from "./scripts/database_page.js";
+
+        const tutorSessionConfig = {
+            tableName: "TutorSession",
+            primaryKey: "SessionID",
+            containerId: "tableContainer",
+
+            onEdit: async function (sessionId, columns, row) {
+                const currentLocation = row[columns.indexOf("Location")];
+                const newLocation = prompt("Enter new location:", currentLocation);
+
+                if (!newLocation) return;
+
+                await makeRequest("POST TutorSession/" + sessionId + " " + JSON.stringify({
+                    Location: newLocation
+                }));
+
+                await loadTutorSessions();
+            },
+
+            onDelete: async function (sessionId) {
+                await makeRequest("DELETE TutorSession/" + sessionId);
+                await loadTutorSessions();
+            }
+        };
+
+        async function loadTutorSessions() {
+            const data = await makeRequest("GET TutorSession");
+            renderTable(data, tutorSessionConfig);
+        }
+
+        document.getElementById("refreshButton").addEventListener("click", loadTutorSessions);
+
+        document.getElementById("createTutorSessionForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+
+            const body = {
+                SessionID: formData.get("SessionID"),
+                SessionDate: formData.get("SessionDate"),
+                Length: formData.get("Length"),
+                Location: formData.get("Location"),
+                ScheduledStatus: formData.get("ScheduledStatus"),
+                TutorID: formData.get("TutorID"),
+                StudentID: formData.get("StudentID")
+            };
+
+            await makeRequest("POST TutorSession " + JSON.stringify(body));
+
+            event.target.reset();
+            await loadTutorSessions();
+        });
+
+        loadTutorSessions();
+    </script>
+</body>
+</html>
