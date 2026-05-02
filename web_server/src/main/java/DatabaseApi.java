@@ -93,42 +93,97 @@ public class DatabaseApi implements HttpHandler {
         }
     }
     private void handlePost(HttpExchange http) {
-    String path = http.getRequestURI().getPath();
-    String[] parts = path.split("/");
+        String path = http.getRequestURI().getPath();
+        String[] parts = path.split("/");
 
-    if (parts.length < 2 || parts[1].isEmpty()) {
-        sendJson(http, 400, "{\"error\":\"Invalid path\"}");
-        return;
-    }
-
-    TableName table = TableName.fromPath(parts[1]);
-
-    if (table == null) {
-        sendJson(http, 404, "{\"error\":\"Unknown table\"}");
-        return;
-    }
-
-    String pkValue = null;
-
-    if (parts.length >= 3 && !parts[2].isEmpty()) {
-        pkValue = parts[2];
-    }
-
-    try {
-        String body = new String(http.getRequestBody().readAllBytes());
-        JsonObject json = JsonParser.parseString(body).getAsJsonObject();
-
-        if (pkValue == null) {
-            insertRow(http, table, json);
-        } else {
-            updateRow(http, table, pkValue, json);
+        if (parts.length < 2 || parts[1].isEmpty()) {
+            sendJson(http, 400, "{\"error\":\"Invalid path\"}");
+            return;
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
-        sendJson(http, 500, "{\"error\":\"POST request failed\"}");
+        if (parts[1].equalsIgnoreCase("procedure")) {
+            handleProcedurePost(http, parts);
+            return;
+        }
+
+        TableName table = TableName.fromPath(parts[1]);
+
+        if (table == null) {
+            sendJson(http, 404, "{\"error\":\"Unknown table\"}");
+            return;
+        }
+
+        String pkValue = null;
+
+        if (parts.length >= 3 && !parts[2].isEmpty()) {
+            pkValue = parts[2];
+        }
+
+        try {
+            String body = new String(http.getRequestBody().readAllBytes());
+            JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+            if (pkValue == null) {
+                insertRow(http, table, json);
+            } else {
+                updateRow(http, table, pkValue, json);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(http, 500, "{\"error\":\"POST request failed\"}");
+        }
     }
-}
+    private void handleProcedurePost(HttpExchange http, String[] parts) {
+        if (parts.length < 3 || parts[2].isEmpty()) {
+            sendJson(http, 400, "{\"error\":\"Missing procedure name\"}");
+            return;
+        }
+
+        String procedureName = parts[2];
+
+        if (!procedureName.equalsIgnoreCase("scheduleSession")) {
+            sendJson(http, 404, "{\"error\":\"Unknown procedure\"}");
+            return;
+        }
+
+        try {
+            String body = new String(http.getRequestBody().readAllBytes());
+            JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+            scheduleTutoringSession(http, json);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(http, 500, "{\"error\":\"Procedure call failed\"}");
+        }
+    }
+
+    private void scheduleTutoringSession(HttpExchange http, JsonObject json) throws Exception {
+        String url = "jdbc:mysql://localhost:3306/TutorSystem";
+        String user = "root";
+        String password = System.getenv("DB_PASSWORD");
+
+        String sql = "{CALL ScheduleTutoringSession(?, ?, ?, ?, ?, ?, ?)}";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             CallableStatement stmt = conn.prepareCall(sql)) {
+
+            stmt.setString(1, json.get("SessionID").getAsString());
+            stmt.setString(2, json.get("SessionDate").getAsString());
+            stmt.setInt(3, json.get("Length").getAsInt());
+            stmt.setString(4, json.get("Location").getAsString());
+            stmt.setString(5, json.get("TutorID").getAsString());
+            stmt.setString(6, json.get("StudentID").getAsString());
+            stmt.setString(7, json.get("CourseID").getAsString());
+
+            stmt.executeUpdate();
+
+            sendJson(http, 201, "{\"message\":\"Tutoring session scheduled\"}");
+        }
+    }
+
+
 
 
 private void insertRow(HttpExchange http, TableName table, JsonObject json) throws Exception {
@@ -241,24 +296,97 @@ private Object getJsonValue(JsonElement element) {
             sendJson(http, 400, "{\"error\" : \"Invalid path\", \"value\" : \"" + path + "\"}");
             return;
         }
-        TableName tableName = TableName.fromPath(parts[1]);
-        System.out.println(tableName + ", from: " + parts[1] + " (full array: " + path + ")");
-        if (tableName != null) {
-            List<String> requestedColumns = getRequestedColumns(http);
 
-            String selectedColumns;
 
-            if (requestedColumns.size() == 1 && requestedColumns.get(0).equals("*")) {
-                selectedColumns = "*";
-            } else {
-                selectedColumns = String.join(", ", requestedColumns);
+
+        if (parts[1].equalsIgnoreCase("view")) {
+            if (parts.length < 3) {
+                sendJson(http, 400, "{\"error\":\"Missing view name\"}");
+                return;
             }
 
-            sql = "SELECT " + selectedColumns + " FROM " + tableName;
-        } else {
-            sendJson(http, 404, "{\"error\": \"Endpoint not found\"}");
+            String viewName = parts[2];
+
+            if (viewName.equalsIgnoreCase("tutorPerformance")) {
+                sql = "SELECT * FROM tutorPerformance";
+            } else if (viewName.equalsIgnoreCase("sessionDetails")) {
+                sql = "SELECT * FROM sessionDetails";
+            } else {
+                sendJson(http, 404, "{\"error\":\"Unknown view\"}");
+                return;
+            }
         }
 
+        // /query/...
+        else if (parts[1].equalsIgnoreCase("query")) {
+            if (parts.length < 3) {
+                sendJson(http, 400, "{\"error\":\"Missing query name\"}");
+                return;
+            }
+
+            String queryName = parts[2];
+
+            if (queryName.equalsIgnoreCase("tutoringSessionsWithNames")) {
+                sql = "SELECT ts.SessionID, ts.SessionDate, " +
+                        "s.FirstName AS StudentFirstName, s.LastName AS StudentLastName, " +
+                        "t.FirstName AS TutorFirstName, t.LastName AS TutorLastName " +
+                        "FROM TutorSession ts " +
+                        "JOIN Students s ON ts.StudentID = s.StudentID " +
+                        "JOIN Tutors t ON ts.TutorID = t.TutorID";
+            } else if (queryName.equalsIgnoreCase("tutorCourses")) {
+                sql = "SELECT T.FirstName, T.LastName, C.CourseName " +
+                        "FROM Tutors T " +
+                        "JOIN Teaches Te ON T.TutorID = Te.TutorID " +
+                        "JOIN Courses C ON Te.CourseID = C.CourseID";
+            } else if (queryName.equalsIgnoreCase("enrolledStudents")) {
+                sql = "SELECT FirstName, LastName " +
+                        "FROM Students " +
+                        "WHERE StudentID IN (SELECT StudentID FROM Enrollment)";
+            } else if (queryName.equalsIgnoreCase("highlyRatedTutors")) {
+                sql = "SELECT * FROM tutorPerformance WHERE AverageRating >= 4";
+            } else {
+                sendJson(http, 404, "{\"error\":\"Unknown query\"}");
+                return;
+            }
+        }
+        else if (parts[1].equalsIgnoreCase("function")) {
+            if (parts.length < 4) {
+                sendJson(http, 400, "{\"error\":\"Missing function parameters\"}");
+                return;
+            }
+
+            String functionName = parts[2];
+            String param = parts[3];
+
+            if (functionName.equalsIgnoreCase("qualifiedTutorCount")) {
+                sql = "SELECT CourseName, CountQualifiedTutors(?) AS AvailableTutors " +
+                        "FROM Courses WHERE CourseID = ?";
+            } else {
+                sendJson(http, 404, "{\"error\":\"Unknown function\"}");
+                return;
+            }
+
+            // function handled differently later
+        } else {
+
+            TableName tableName = TableName.fromPath(parts[1]);
+            System.out.println(tableName + ", from: " + parts[1] + " (full array: " + path + ")");
+            if (tableName != null) {
+                List<String> requestedColumns = getRequestedColumns(http);
+
+                String selectedColumns;
+
+                if (requestedColumns.size() == 1 && requestedColumns.get(0).equals("*")) {
+                    selectedColumns = "*";
+                } else {
+                    selectedColumns = String.join(", ", requestedColumns);
+                }
+
+                sql = "SELECT " + selectedColumns + " FROM " + tableName;
+            } else {
+                sendJson(http, 404, "{\"error\": \"Endpoint not found\"}");
+            }
+        }
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
             if (!sql.isEmpty()) {
                 PreparedStatement stmt = conn.prepareStatement(sql);

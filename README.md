@@ -40,10 +40,44 @@ In this project you must set the environment variable DB_PASSWORD to your databa
 In intellij, you can go to configure your run configuration and set the environment varaible by typing 
 `DB_PASSWORD={password}` in the `Environment varaibles` section.
 
+## How to run website server
+To launch the website, you must go to the `\database-systems-project\site` directory and run `npx http-server web`, then click on one of the links that it gives for your web server to access the pages
+
 ## How to use API/REPL
 The REPL accepts the following formats:
-`GET table_name` - Gets all the columns of the table
-`GET table_name?columns=table_col_name1,table_col_name2,...` - Gets only the specified columns of the table
-`POST table_name {"table_col_name": "table_col_value", ...}` - Creates a new row in the table with the given attributes
-`POST table_name/PK_value {"table_col_name": "table_col_value", ...}` - Updates the row in the given table with primary key `PK_value` by replacing the given `table_col_name` columns with `tale_col_value` values.
-`DELETE table_name/PK_value` - Deletes the row that has primary key `PK_value`
+### CRUD
+
+`GET table_name` - Gets all the columns of the table  
+
+`GET table_name?columns=table_col_name1,table_col_name2,...` - Gets only the specified columns of the table  
+
+`POST table_name {"table_col_name": "table_col_value", ...}` - Creates a new row in the table with the given attributes  
+
+`POST table_name/PK_value {"table_col_name": "table_col_value", ...}` - Updates the row in the given table with primary key `PK_value` by replacing the given `table_col_name` columns with `tale_col_value` values.  
+
+`DELETE table_name/PK_value` - Deletes the row that has primary key `PK_value`  
+
+### Views
+
+`GET view/tutorPerformance` - Returns tutor performance (average rating and total reviews)  
+
+`GET view/sessionDetails` - Returns detailed session info including student, tutor, and course data  
+
+### Custom Queries
+
+`GET query/tutoringSessionsWithNames` - Returns tutoring sessions with student and tutor names  
+
+`GET query/tutorCourses` - Returns the courses each tutor teaches  
+
+`GET query/enrolledStudents` - Returns students enrolled in at least one course  
+
+`GET query/highlyRatedTutors` - Returns tutors with average rating ≥ 4  
+
+### Functions
+
+`GET function/qualifiedTutorCount/C101` - Returns number of tutors qualified for course `C101`  
+
+### Stored Procedures
+
+`POST procedure/scheduleSession {"SessionID":"SS006","SessionDate":"2026-05-01","Length":60,"Location":"online","TutorID":"T001","StudentID":"S002","CourseID":"C101"}`  - Schedules a tutoring session (inserts into multiple tables)  
+
