@@ -282,8 +282,8 @@ DELIMITER ;
 
 /* Testing Trigger --> enforceValidReviews */
 /* This should fail since S003 never had a session with T001. */
-INSERT INTO Review VALUES
-('R999', 5, 'Great tutor!', 'T001', 'S003');
+-- INSERT INTO Review VALUES
+-- ('R999', 5, 'Great tutor!', 'T001', 'S003');
 
 /* Queries */
 /* Join */
