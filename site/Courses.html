@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Courses</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-top: 10px;}
+        input, select, button { display: block; margin: 5px 0; padding: 5px; width: 100%; max-width: 300px;}
+        button { background-color: #0056b3; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #004494; }
+        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; margin-top: 10px; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Back to Home</a>
+</nav>
+
+<h1>Manage Courses</h1>
+
+<form id="create-course">
+    <h3>Add New Course</h3>
+    <input type="text" id="c-crs-id" placeholder="Course ID (e.g., C106)" required>
+    <input type="text" id="c-crs-name" placeholder="Course Name" required>
+    <input type="number" id="c-crs-credits" placeholder="Credit Hours (0-4)" min="0" max="4" required>
+    <button type="submit">Insert Course</button>
+</form>
+
+<form id="update-course">
+    <h3>Update Course Info</h3>
+    <input type="text" id="u-crs-id" placeholder="Course ID to update" required>
+    <input type="text" id="u-crs-name" placeholder="New Course Name">
+    <button type="submit">Update Course</button>
+</form>
+
+<form id="delete-course">
+    <h3>Remove Course</h3>
+    <input type="text" id="d-crs-id" placeholder="Course ID to delete" required>
+    <button type="submit" style="background-color: #dc3545;">Delete Course</button>
+</form>
+
+<div>
+    <h3>View Courses</h3>
+    <button id="read-crs-btn" type="button">Refresh Course List</button>
+    <div id="results-courses"></div>
+</div>
+
+<script type="module" src="./dist/client.js"></script>
+</body>
+</html>
