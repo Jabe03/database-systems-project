@@ -40,6 +40,9 @@ In this project you must set the environment variable DB_PASSWORD to your databa
 In intellij, you can go to configure your run configuration and set the environment varaible by typing 
 `DB_PASSWORD={password}` in the `Environment varaibles` section.
 
+## How to run website server
+To launch the website, you must go to the `\database-systems-project\site` directory and run `npx http-server web`, then click on one of the links that it gives for your web server to access the pages
+
 ## How to use API/REPL
 The REPL accepts the following formats:
 `GET table_name` - Gets all the columns of the table
