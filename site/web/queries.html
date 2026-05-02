@@ -100,7 +100,7 @@ WHERE AverageRating >= 4;
 
         renderTable(data, {
             tableName: request,
-            primaryKey: "",
+            primaryKey: data.columns && data.columns.length > 0 ? data.columns[0] : "",
             containerId: resultId,
             showActions: false,
             onEdit: async () => {},
