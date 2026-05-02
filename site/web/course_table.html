@@ -46,16 +46,7 @@
             containerId: "tableContainer",
 
             onEdit: async function (courseId, columns, row) {
-                const currentName = row[columns.indexOf("CourseName")];
-                const newName = prompt("Enter new course name:", currentName);
-
-                if (!newName) return;
-
-                await makeRequest("POST Courses/" + courseId + " " + JSON.stringify({
-                    CourseName: newName
-                }));
-
-                await loadCourses();
+                await editRow("Courses", "CourseID", courseId, columns, row, loadCourses);
             },
 
             onDelete: async function (courseId) {
@@ -63,6 +54,33 @@
                 await loadCourses();
             }
         };
+
+        async function editRow(tableName, primaryKey, pkValue, columns, row, reloadFunction) {
+            const body = {};
+
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
+
+                if (column === primaryKey) continue;
+
+                const currentValue = row[i];
+                const newValue = prompt("Enter new value for " + column + ":", currentValue);
+
+                if (newValue === null) return;
+
+                if (newValue !== String(currentValue)) {
+                    body[column] = newValue;
+                }
+            }
+
+            if (Object.keys(body).length === 0) {
+                alert("No changes made.");
+                return;
+            }
+
+            await makeRequest("POST " + tableName + "/" + pkValue + " " + JSON.stringify(body));
+            await reloadFunction();
+        }
 
         async function loadCourses() {
             const data = await makeRequest("GET Courses");

@@ -48,16 +48,7 @@
             containerId: "tableContainer",
 
             onEdit: async function (tutorId, columns, row) {
-                const currentRate = row[columns.indexOf("HourlyRate")];
-                const newRate = prompt("Enter new hourly rate:", currentRate);
-
-                if (!newRate) return;
-
-                await makeRequest("POST Tutors/" + tutorId + " " + JSON.stringify({
-                    HourlyRate: Number(newRate)
-                }));
-
-                await loadTutors();
+                await editRow("Tutors", "TutorID", tutorId, columns, row, loadTutors);
             },
 
             onDelete: async function (tutorId) {
@@ -65,6 +56,37 @@
                 await loadTutors();
             }
         };
+
+        async function editRow(tableName, primaryKey, pkValue, columns, row, reloadFunction) {
+            const body = {};
+
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
+
+                if (column === primaryKey) {
+                    continue;
+                }
+
+                const currentValue = row[i];
+                const newValue = prompt("Enter new value for " + column + ":", currentValue);
+
+                if (newValue === null) {
+                    return;
+                }
+
+                if (newValue !== String(currentValue)) {
+                    body[column] = newValue;
+                }
+            }
+
+            if (Object.keys(body).length === 0) {
+                alert("No changes made.");
+                return;
+            }
+
+            await makeRequest("POST " + tableName + "/" + pkValue + " " + JSON.stringify(body));
+            await reloadFunction();
+        }
 
         async function loadTutors() {
             const data = await makeRequest("GET Tutors");

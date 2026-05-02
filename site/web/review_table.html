@@ -48,16 +48,7 @@
             containerId: "tableContainer",
 
             onEdit: async function (reviewId, columns, row) {
-                const currentComment = row[columns.indexOf("COMMENT")];
-                const newComment = prompt("Enter new comment:", currentComment);
-
-                if (!newComment) return;
-
-                await makeRequest("POST Review/" + reviewId + " " + JSON.stringify({
-                    COMMENT: newComment
-                }));
-
-                await loadReviews();
+                 await editRow("Review", "ReviewID", reviewId, columns, row, loadReviews);
             },
 
             onDelete: async function (reviewId) {
@@ -65,7 +56,36 @@
                 await loadReviews();
             }
         };
+        async function editRow(tableName, primaryKey, pkValue, columns, row, reloadFunction) {
+            const body = {};
 
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
+
+                if (column === primaryKey) {
+                    continue;
+                }
+
+                const currentValue = row[i];
+                const newValue = prompt("Enter new value for " + column + ":", currentValue);
+
+                if (newValue === null) {
+                    return;
+                }
+
+                if (newValue !== String(currentValue)) {
+                    body[column] = newValue;
+                }
+            }
+
+            if (Object.keys(body).length === 0) {
+                alert("No changes made.");
+                return;
+            }
+
+            await makeRequest("POST " + tableName + "/" + pkValue + " " + JSON.stringify(body));
+            await reloadFunction();
+        }
         async function loadReviews() {
             const data = await makeRequest("GET Review");
             renderTable(data, reviewConfig);

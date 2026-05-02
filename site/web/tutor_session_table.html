@@ -50,16 +50,7 @@
             containerId: "tableContainer",
 
             onEdit: async function (sessionId, columns, row) {
-                const currentLocation = row[columns.indexOf("Location")];
-                const newLocation = prompt("Enter new location:", currentLocation);
-
-                if (!newLocation) return;
-
-                await makeRequest("POST TutorSession/" + sessionId + " " + JSON.stringify({
-                    Location: newLocation
-                }));
-
-                await loadTutorSessions();
+                await editRow("TutorSession", "SessionID", sessionId, columns, row, loadTutorSessions);
             },
 
             onDelete: async function (sessionId) {
@@ -67,6 +58,37 @@
                 await loadTutorSessions();
             }
         };
+
+        async function editRow(tableName, primaryKey, pkValue, columns, row, reloadFunction) {
+            const body = {};
+
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
+
+                if (column === primaryKey) {
+                    continue;
+                }
+
+                const currentValue = row[i];
+                const newValue = prompt("Enter new value for " + column + ":", currentValue);
+
+                if (newValue === null) {
+                    return;
+                }
+
+                if (newValue !== String(currentValue)) {
+                    body[column] = newValue;
+                }
+            }
+
+            if (Object.keys(body).length === 0) {
+                alert("No changes made.");
+                return;
+            }
+
+            await makeRequest("POST " + tableName + "/" + pkValue + " " + JSON.stringify(body));
+            await reloadFunction();
+        }
 
         async function loadTutorSessions() {
             const data = await makeRequest("GET TutorSession");

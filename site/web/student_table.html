@@ -55,16 +55,7 @@
             containerId: "tableContainer",
 
             onEdit: async function (studentId, columns, row) {
-                const currentEmail = row[columns.indexOf("Email")];
-                const newEmail = prompt("Enter new email:", currentEmail);
-
-                if (!newEmail) return;
-
-                await makeRequest("POST Students/" + studentId + " " + JSON.stringify({
-                    Email: newEmail
-                }));
-
-                await loadStudents();
+                await editRow("Students", "StudentID", studentId, columns, row, loadStudents);
             },
 
             onDelete: async function (studentId) {
@@ -72,6 +63,37 @@
                 await loadStudents();
             }
         };
+
+        async function editRow(tableName, primaryKey, pkValue, columns, row, reloadFunction) {
+            const body = {};
+
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
+
+                if (column === primaryKey) {
+                    continue;
+                }
+
+                const currentValue = row[i];
+                const newValue = prompt("Enter new value for " + column + ":", currentValue);
+
+                if (newValue === null) {
+                    return;
+                }
+
+                if (newValue !== String(currentValue)) {
+                    body[column] = newValue;
+                }
+            }
+
+            if (Object.keys(body).length === 0) {
+                alert("No changes made.");
+                return;
+            }
+
+            await makeRequest("POST " + tableName + "/" + pkValue + " " + JSON.stringify(body));
+            await reloadFunction();
+        }
 
         async function loadStudents() {
             const data = await makeRequest("GET Students");
@@ -90,7 +112,7 @@
                 FirstName: formData.get("FirstName"),
                 LastName: formData.get("LastName"),
                 Email: formData.get("Email"),
-                AGE: formData.get("AGE"),
+                AGE: formData.get("Age"),
                 Year: formData.get("Year")
             };
 
