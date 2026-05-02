@@ -34,3 +34,10 @@ Call chain:
   - Enumerate all database commands we want to implement
   - Provide explicit support for these commands
 
+
+## How to use API/REPL
+The REPL accepts the following formats:
+`GET table_name` - Gets all the columns of the table
+`GET table_name?columns=table_col_name1,table_col_name2,...` - Gets only the specified columns of the table
+`POST table_name {"table_col_name": "table_col_value", ...}` - Creates a new row in the table with the given attributes
+`POST table_name/PK_value {"table_col_name": "table_col_value", ...}` - Updates the row in the given table with primary key `PK_value` by replacing the given `table_col_name` columns with `tale_col_value` values.

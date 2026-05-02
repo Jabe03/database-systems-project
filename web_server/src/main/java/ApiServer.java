@@ -9,9 +9,6 @@ public class ApiServer  {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 8080), 0);
             DatabaseApi apiHandler = new DatabaseApi();
-            server.createContext("/tutors", apiHandler);
-            server.createContext("/performance", apiHandler);
-            server.createContext("/enrollment", apiHandler);
             server.createContext("/", apiHandler);
             server.start();
         } catch (IOException e) {

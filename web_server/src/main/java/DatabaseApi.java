@@ -1,5 +1,4 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -19,16 +18,160 @@ public class DatabaseApi implements HttpHandler {
     public void handle(HttpExchange http) {
         addHeaders(http);
 
-        if(http.getRequestMethod().equals("GET")){
-            handleGet(http);
+        if (http.getRequestMethod().equalsIgnoreCase("GET")) {
+        handleGet(http);
+        } else if (http.getRequestMethod().equalsIgnoreCase("POST")) {
+            handlePost(http);
+        } else {
+            sendJson(http, 405, "{\"error\":\"Method not allowed\"}");
         }
     }
+
+
     private void addHeaders(HttpExchange http) {
         http.getResponseHeaders().add("Content-Type", "application/json");
         http.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         http.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         http.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
     }
+
+    private void handlePost(HttpExchange http) {
+    String path = http.getRequestURI().getPath();
+    String[] parts = path.split("/");
+
+    if (parts.length < 2 || parts[1].isEmpty()) {
+        sendJson(http, 400, "{\"error\":\"Invalid path\"}");
+        return;
+    }
+
+    TableName table = TableName.fromPath(parts[1]);
+
+    if (table == null) {
+        sendJson(http, 404, "{\"error\":\"Unknown table\"}");
+        return;
+    }
+
+    String pkValue = null;
+
+    if (parts.length >= 3 && !parts[2].isEmpty()) {
+        pkValue = parts[2];
+    }
+
+    try {
+        String body = new String(http.getRequestBody().readAllBytes());
+        JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+
+        if (pkValue == null) {
+            insertRow(http, table, json);
+        } else {
+            updateRow(http, table, pkValue, json);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        sendJson(http, 500, "{\"error\":\"POST request failed\"}");
+    }
+}
+
+
+private void insertRow(HttpExchange http, TableName table, JsonObject json) throws Exception {
+    String url = "jdbc:mysql://localhost:3306/TutorSystem";
+    String user = "root";
+    String password = System.getenv("DB_PASSWORD");
+
+    List<String> columns = new ArrayList<>();
+    List<Object> values = new ArrayList<>();
+
+    for (String key : json.keySet()) {
+        columns.add(key);
+        values.add(getJsonValue(json.get(key)));
+    }
+
+    String placeholders = String.join(", ", Collections.nCopies(columns.size(), "?"));
+
+    String sql = "INSERT INTO " + table + " (" +
+            String.join(", ", columns) +
+            ") VALUES (" +
+            placeholders +
+            ")";
+
+    try (Connection conn = DriverManager.getConnection(url, user, password);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        for (int i = 0; i < values.size(); i++) {
+            stmt.setObject(i + 1, values.get(i));
+        }
+
+        int affected = stmt.executeUpdate();
+
+        sendJson(http, 201, "{\"message\":\"Row created\", \"affectedRows\":" + affected + "}");
+    }
+}
+
+
+private void updateRow(HttpExchange http, TableName table, String pkValue, JsonObject json) throws Exception {
+    String pk = table.primaryKey();
+
+    if (pk == null) {
+        sendJson(http, 400, "{\"error\":\"This table has a composite primary key and is not supported yet\"}");
+        return;
+    }
+
+    String url = "jdbc:mysql://localhost:3306/TutorSystem";
+    String user = "root";
+    String password = System.getenv("DB_PASSWORD");
+
+    List<String> assignments = new ArrayList<>();
+    List<Object> values = new ArrayList<>();
+
+    for (String key : json.keySet()) {
+        assignments.add(key + " = ?");
+        values.add(getJsonValue(json.get(key)));
+    }
+
+    String sql = "UPDATE " + table +
+            " SET " + String.join(", ", assignments) +
+            " WHERE " + pk + " = ?";
+
+    try (Connection conn = DriverManager.getConnection(url, user, password);
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        for (int i = 0; i < values.size(); i++) {
+            stmt.setObject(i + 1, values.get(i));
+        }
+
+        stmt.setObject(values.size() + 1, pkValue);
+
+        int affected = stmt.executeUpdate();
+
+        sendJson(http, 200, "{\"message\":\"Row updated\", \"affectedRows\":" + affected + "}");
+    }
+}
+
+
+private Object getJsonValue(JsonElement element) {
+    if (element.isJsonNull()) {
+        return null;
+    }
+
+    if (element.isJsonPrimitive()) {
+        if (element.getAsJsonPrimitive().isBoolean()) {
+            return element.getAsBoolean();
+        }
+
+        if (element.getAsJsonPrimitive().isNumber()) {
+            return element.getAsNumber();
+        }
+
+        if (element.getAsJsonPrimitive().isString()) {
+            return element.getAsString();
+        }
+    }
+
+    return element.toString();
+}
+
+
     private void handleGet(HttpExchange http){
         String path = http.getRequestURI().getPath();
         String jsonResponse = "";
