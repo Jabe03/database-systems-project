@@ -85,6 +85,41 @@ WHERE AverageRating >= 4;
     <div class="query-results" id="result-5"></div>
 </div>
 
-<script type="module" src="./dist/client.js"></script>
+<script type="module">
+    import { makeRequest, renderTable } from "./scripts/database_page.js";
+
+    async function runQuery(request, resultId) {
+        const data = await makeRequest(request);
+
+        renderTable(data, {
+            tableName: request,
+            primaryKey: "",
+            containerId: resultId,
+            showActions: false,
+            onEdit: async () => {},
+            onDelete: async () => {}
+        });
+    }
+
+    document.getElementById("run-q1").addEventListener("click", () =>
+        runQuery("GET query/tutoringSessionsWithNames", "result-1")
+    );
+
+    document.getElementById("run-q2").addEventListener("click", () =>
+        runQuery("GET view/tutorPerformance", "result-2")
+    );
+
+    document.getElementById("run-q3").addEventListener("click", () =>
+        runQuery("GET query/tutorCourses", "result-3")
+    );
+
+    document.getElementById("run-q4").addEventListener("click", () =>
+        runQuery("GET query/enrolledStudents", "result-4")
+    );
+
+    document.getElementById("run-q5").addEventListener("click", () =>
+        runQuery("GET query/highlyRatedTutors", "result-5")
+    );
+</script>
 </body>
 </html>

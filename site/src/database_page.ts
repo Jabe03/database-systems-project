@@ -19,6 +19,7 @@ type RenderTableConfig = {
     containerId: string;
     onEdit: (pkValue: unknown, columns: string[], row: unknown[]) => void | Promise<void>;
     onDelete: (pkValue: unknown) => void | Promise<void>;
+    showActions?: boolean; // 👈 NEW
 };
 
 function parseInput(input: string): ParsedInput {
@@ -103,9 +104,13 @@ export function renderTable(data: TableData, config: RenderTableConfig): void {
         headerRow.appendChild(th);
     }
 
-    const actionsHeader = document.createElement("th");
-    actionsHeader.textContent = "Actions";
-    headerRow.appendChild(actionsHeader);
+    const showActions = config.showActions !== false; // 👈 default = true
+
+    if (showActions) {
+        const actionsHeader = document.createElement("th");
+        actionsHeader.textContent = "Actions";
+        headerRow.appendChild(actionsHeader);
+    }
 
     table.appendChild(headerRow);
 
@@ -118,28 +123,31 @@ export function renderTable(data: TableData, config: RenderTableConfig): void {
             tr.appendChild(td);
         }
 
-        const pkIndex = columns.indexOf(config.primaryKey);
+        if (showActions) {
+            const pkIndex = columns.indexOf(config.primaryKey);
 
-        if (pkIndex === -1) {
-            throw new Error("Primary key not found in columns: " + config.primaryKey);
+            if (pkIndex === -1) {
+                throw new Error("Primary key not found in columns: " + config.primaryKey);
+            }
+
+            const pkValue = row[pkIndex];
+
+            const actions = document.createElement("td");
+
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.onclick = () => config.onEdit(pkValue, columns, row);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.onclick = () => config.onDelete(pkValue);
+
+            actions.appendChild(editButton);
+            actions.appendChild(deleteButton);
+
+            tr.appendChild(actions);
         }
 
-        const pkValue = row[pkIndex];
-
-        const actions = document.createElement("td");
-
-        const editButton = document.createElement("button");
-        editButton.textContent = "Edit";
-        editButton.onclick = () => config.onEdit(pkValue, columns, row);
-
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.onclick = () => config.onDelete(pkValue);
-
-        actions.appendChild(editButton);
-        actions.appendChild(deleteButton);
-
-        tr.appendChild(actions);
         table.appendChild(tr);
     }
 

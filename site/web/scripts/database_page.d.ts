@@ -8,6 +8,7 @@ type RenderTableConfig = {
     containerId: string;
     onEdit: (pkValue: unknown, columns: string[], row: unknown[]) => void | Promise<void>;
     onDelete: (pkValue: unknown) => void | Promise<void>;
+    showActions?: boolean;
 };
 export declare function makeRequest(input: string): Promise<unknown>;
 export declare function renderTable(data: TableData, config: RenderTableConfig): void;

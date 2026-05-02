@@ -61,9 +61,12 @@ export function renderTable(data, config) {
         th.textContent = col;
         headerRow.appendChild(th);
     }
-    const actionsHeader = document.createElement("th");
-    actionsHeader.textContent = "Actions";
-    headerRow.appendChild(actionsHeader);
+    const showActions = config.showActions !== false; // 👈 default = true
+    if (showActions) {
+        const actionsHeader = document.createElement("th");
+        actionsHeader.textContent = "Actions";
+        headerRow.appendChild(actionsHeader);
+    }
     table.appendChild(headerRow);
     for (const row of rows) {
         const tr = document.createElement("tr");
@@ -72,21 +75,23 @@ export function renderTable(data, config) {
             td.textContent = value === null || value === undefined ? "" : String(value);
             tr.appendChild(td);
         }
-        const pkIndex = columns.indexOf(config.primaryKey);
-        if (pkIndex === -1) {
-            throw new Error("Primary key not found in columns: " + config.primaryKey);
+        if (showActions) {
+            const pkIndex = columns.indexOf(config.primaryKey);
+            if (pkIndex === -1) {
+                throw new Error("Primary key not found in columns: " + config.primaryKey);
+            }
+            const pkValue = row[pkIndex];
+            const actions = document.createElement("td");
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.onclick = () => config.onEdit(pkValue, columns, row);
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.onclick = () => config.onDelete(pkValue);
+            actions.appendChild(editButton);
+            actions.appendChild(deleteButton);
+            tr.appendChild(actions);
         }
-        const pkValue = row[pkIndex];
-        const actions = document.createElement("td");
-        const editButton = document.createElement("button");
-        editButton.textContent = "Edit";
-        editButton.onclick = () => config.onEdit(pkValue, columns, row);
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.onclick = () => config.onDelete(pkValue);
-        actions.appendChild(editButton);
-        actions.appendChild(deleteButton);
-        tr.appendChild(actions);
         table.appendChild(tr);
     }
     container.appendChild(table);
