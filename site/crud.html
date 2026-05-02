@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crud</title>
+    <style>
+        form {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        input, select, button {
+            display: block;
+            margin: 5px 0;
+            padding: 3px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Back to Home</a>
+</nav>
+
+<h1>Student Directory</h1>
+
+<form id="create-form">
+    <h3>1. Add New Student</h3>
+    <input type="text" id="c-id" placeholder="Student ID (e.g., S006)" required>
+    <input type="text" id="c-first" placeholder="First Name" required>
+    <input type="text" id="c-last" placeholder="Last Name" required>
+    <input type="email" id="c-email" placeholder="Email" required>
+    <input type="number" id="c-age" placeholder="Age" required>
+    <select id="c-year" required>
+        <option value="" disabled selected>Year</option>
+        <option value="freshman">Freshman</option>
+        <option value="sophomore">Sophomore</option>
+        <option value="junior">Junior</option>
+        <option value="senior">Senior</option>
+    </select>
+    <button type="submit">Insert</button>
+</form>
+
+<!-- This is the one that we can use to activate the trigger-->
+<form id="add-review">
+    <h3>2. Review a tutor</h3>
+    <input type="text" id="r-student-id" placeholder="Student ID (e.g., S006)" required>
+    <input type="text" id="r-comment" placeholder="Comment" required>
+    <input type="text" id="r-rating" placeholder="Rating 1-5" required>
+    <input type="text" id="r-tutor-id" placeholder="Tutor ID" required>
+    <input type="text" id="r-review-id" placeholder="Review ID" required>
+
+    <button type="submit">Insert</button>
+</form>
+
+
+
+<form id="update-form">
+    <h3>3. Update Student Info </h3>
+    <input type="text" id="u-id" placeholder="Student ID to update (e.g., S006)" required>
+    <input type="email" id="u-email" placeholder="New Email">
+    <select id="u-year">
+        <option value="" disabled selected>Year</option>
+        <option value="freshman">Freshman</option>
+        <option value="sophomore">Sophomore</option>
+        <option value="junior">Junior</option>
+        <option value="senior">Senior</option>
+    </select>
+    <button type="submit">Update Record</button>
+</form>
+
+
+<form id="delete-form">
+    <h3>4. Remove Student</h3>
+    <input type="text" id="d-id" placeholder="Student ID to delete" required>
+    <button type="submit">Delete Record</button>
+</form>
+
+<div>
+    <h3>5. View Students</h3>
+    <button id="read-btn">Refresh Student List</button>
+    <br><br>
+
+</div>
+
+<script type="module" src="./dist/client.js"></script>
+</body>
+</html>

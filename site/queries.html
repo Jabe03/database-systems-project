@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queries</title>
+    <style>
+        .query { margin-bottom: 30px; border: 1px solid #ccc; padding: 15px; }
+        pre { background: #eee; padding: 10px; overflow-x: auto; }
+        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">Back to Home</a>
+</nav>
+
+<h1>Database Queries Showcase</h1>
+
+<div class="query">
+    <h3>1. Tutoring Sessions </h3>
+    <p><strong>Description:</strong> This Query simply retrieves a list of all tutoring sessions.</p>
+    <pre><code>
+SELECT ts.SessionID, ts.SessionDate,
+       s.FirstName AS StudentFirstName, s.LastName AS StudentLastName,
+       t.FirstName AS TutorFirstName, t.LastName AS TutorLastName
+FROM TutorSession ts
+JOIN Students s ON ts.StudentID = s.StudentID
+JOIN Tutors t ON ts.TutorID = t.TutorID;
+</code></pre>
+    <button class="button" id="run-q1">Run</button>
+    <div class="query-results" id="result-1"></div>
+</div>
+
+<div class="query">
+    <h3>2. Tutor Average Ratings</h3>
+    <p><strong>Description:</strong>This query uses an aggregation to show the average rating for each of the tutors.</p>
+    <pre><code>
+SELECT T.TutorID, T.FirstName, T.LastName,
+       AVG(R.Rating) AS AvgRating
+FROM Tutors T
+JOIN Review R ON T.TutorID = R.TutorID
+GROUP BY T.TutorID, T.FirstName, T.LastName;
+</code></pre>
+    <button class="button" id="run-q2">Run</button>
+    <div class="query-results" id="result-2"></div>
+</div>
+
+<div class="query">
+    <h3>3. Tutor Courses</h3>
+    <p><strong>Description:</strong> This query uses a join to create a list of all tutors as well as the courses that they teach.</p>
+    <pre><code>
+SELECT T.FirstName, T.LastName, C.CourseName
+FROM Tutors T
+JOIN Teaches Te ON T.TutorID = Te.TutorID
+JOIN Courses C ON Te.CourseID = C.CourseID;
+</code></pre>
+    <button class="button" id="run-q3">Run</button>
+    <div class="query-results" id="result-3"></div>
+</div>
+
+<div class="query">
+    <h3>4. Students enrolled in a class</h3>
+    <p><strong>Description:</strong> Uses a subquery to view a list of all students that are actively enrolled in any course.</p>
+    <pre><code>
+SELECT FirstName, LastName
+FROM Students
+WHERE StudentID IN (
+    SELECT StudentID FROM Enrollment
+);
+</code></pre>
+    <button class="button" id="run-q4">Run</button>
+    <div class="query-results" id="result-4"></div>
+</div>
+
+<div class="query">
+    <h3>5. Tutor Performance</h3>
+    <p><strong>Description:</strong> We created a view that lists all tutors and their average ratings. This is a simple query that shows us a list of all tutors whose average rating is greater than or equal to 4. </p>
+    <pre><code>
+SELECT * FROM tutorPerformance
+WHERE AverageRating >= 4;
+</code></pre>
+    <button class="button" id="run-q5">Run</button>
+    <div class="query-results" id="result-5"></div>
+</div>
+
+<script type="module" src="./dist/client.js"></script>
+</body>
+</html>
