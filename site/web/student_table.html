@@ -2,6 +2,17 @@
 <html>
 <head>
     <title>Students Table</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-top: 10px;}
+        input, select, button { display: block; margin: 5px 0; padding: 5px; width: 100%; max-width: 300px;}
+        button { background-color: #0056b3; color: white; border: none; cursor: pointer; padding: 8px;}
+        button:hover { background-color: #004494; }
+        table { border-collapse: collapse; margin-top: 15px; width: 100%; max-width: 800px; }
+        table, th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        pre { background: #eee; padding: 10px; max-width: 800px; overflow-x: auto; }
+    </style>
 </head>
 <body>
     <h1>Students</h1>
@@ -20,8 +31,14 @@
         <label>FirstName: <input name="FirstName" required></label><br>
         <label>LastName: <input name="LastName" required></label><br>
         <label>Email: <input name="Email" required></label><br>
-        <label>AGE: <input name="AGE" required></label><br>
-        <label>Year: <input name="Year" required></label><br>
+        <label>Age: <input name="Age" required></label><br>
+        <select name="Year" required>
+            <option value="" disabled selected>Select Year</option>
+            <option value="freshman">Freshman</option>
+            <option value="sophomore">Sophomore</option>
+            <option value="junior">Junior</option>
+            <option value="senior">Senior</option>
+        </select><br>
 
         <button type="submit">Create Student</button>
     </form>
