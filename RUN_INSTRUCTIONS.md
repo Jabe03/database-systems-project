@@ -42,8 +42,6 @@ For example:
 
 `http://localhost:8081`
 
----
-
 ### 5. Use the website
 
 From the homepage, use the links to access the database table pages.
