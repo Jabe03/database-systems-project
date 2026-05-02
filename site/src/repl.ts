@@ -9,12 +9,28 @@ const rl = readline.createInterface({
 
 const BASE_URL = "http://localhost:8080/";
 
-async function makeRequest(input:string) {
-     const parts = input.split(" ");
+function parseInput(input: string) {
+  const firstSpace = input.indexOf(" ");
+  if (firstSpace === -1) return { method: "GET", path: "", body: "" };
 
-        const method = parts[0] || "GET";
-        const path = parts[1] || "";
-        const body = parts.slice(2).join(" ");
+  const secondSpace = input.indexOf(" ", firstSpace + 1);
+
+  const method = input.substring(0, firstSpace);
+
+  if (secondSpace === -1) {
+    const path = input.substring(firstSpace + 1);
+    return { method, path, body: "" };
+  }
+
+  const path = input.substring(firstSpace + 1, secondSpace);
+  const body = input.substring(secondSpace + 1);
+
+  return { method, path, body };
+}
+
+async function makeRequest(input: string) {
+  const { method, path, body } = parseInput(input);
+
   try {
     const url = BASE_URL + path;
 

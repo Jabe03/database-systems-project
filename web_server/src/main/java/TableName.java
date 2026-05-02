@@ -1,19 +1,25 @@
 public enum TableName {
-    STUDENTS("STUDENTS"),
-    COURSES("COURSES"),
-    TUTORS("TUTORS"),
-    TUTOR_SESSION("TUTORSESSION"),
-    REVIEW("REVIEW"),
-    ENROLLMENT("ENROLLMENT"),
-    TEACHES("TEACHES"),
-    SESSION_COURSE("SESSIONCOURSE"),
-    AVAILABILITY("AVAILABILITY"),
-    QUALIFICATION("QUALIFICATION");
+    STUDENTS("Students", "StudentID"),
+    COURSES("Courses", "CourseID"),
+    TUTORS("Tutors", "TutorID"),
+    TUTOR_SESSION("TutorSession", "SessionID"),
+    REVIEW("Review", "ReviewID"),
+    ENROLLMENT("Enrollment", null),
+    TEACHES("Teaches", null),
+    SESSION_COURSE("SessionCourse", null),
+    AVAILABILITY("Availability", null),
+    QUALIFICATION("Qualification", null);
 
     private final String tableName;
+    private final String primaryKey;
 
-    TableName(String tableName) {
+    TableName(String tableName, String primaryKey) {
         this.tableName = tableName;
+        this.primaryKey = primaryKey;
+    }
+
+    public String primaryKey() {
+        return primaryKey;
     }
 
     @Override
@@ -21,14 +27,6 @@ public enum TableName {
         return tableName;
     }
 
-    public static boolean isValid(String pathSegment) {
-        for (TableName t : values()) {
-            if (t.tableName.equalsIgnoreCase(pathSegment)) {
-                return true;
-            }
-        }
-        return false;
-    }
     public static TableName fromPath(String pathSegment) {
         for (TableName t : values()) {
             if (t.tableName.equalsIgnoreCase(pathSegment)) {
