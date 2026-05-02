@@ -34,6 +34,11 @@ Call chain:
   - Enumerate all database commands we want to implement
   - Provide explicit support for these commands
 
+## How to run Java API
+To run the java database API server, you must provide the password to the database server.  
+In this project you must set the environment variable DB_PASSWORD to your database password.  
+In intellij, you can go to configure your run configuration and set the environment varaible by typing 
+`DB_PASSWORD={password}` in the `Environment varaibles` section.
 
 ## How to use API/REPL
 The REPL accepts the following formats:
@@ -41,3 +46,4 @@ The REPL accepts the following formats:
 `GET table_name?columns=table_col_name1,table_col_name2,...` - Gets only the specified columns of the table
 `POST table_name {"table_col_name": "table_col_value", ...}` - Creates a new row in the table with the given attributes
 `POST table_name/PK_value {"table_col_name": "table_col_value", ...}` - Updates the row in the given table with primary key `PK_value` by replacing the given `table_col_name` columns with `tale_col_value` values.
+`DELETE table_name/PK_value` - Deletes the row that has primary key `PK_value`
