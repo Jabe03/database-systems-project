@@ -19,9 +19,11 @@ public class DatabaseApi implements HttpHandler {
         addHeaders(http);
 
         if (http.getRequestMethod().equalsIgnoreCase("GET")) {
-        handleGet(http);
+            handleGet(http);
         } else if (http.getRequestMethod().equalsIgnoreCase("POST")) {
             handlePost(http);
+        } else if (http.getRequestMethod().equalsIgnoreCase("DELETE")) {
+            handleDelete(http);
         } else {
             sendJson(http, 405, "{\"error\":\"Method not allowed\"}");
         }
@@ -34,7 +36,55 @@ public class DatabaseApi implements HttpHandler {
         http.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         http.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
     }
+    private void handleDelete(HttpExchange http) {
+        String path = http.getRequestURI().getPath();
+        String[] parts = path.split("/");
 
+        if (parts.length < 3 || parts[1].isEmpty() || parts[2].isEmpty()) {
+            sendJson(http, 400, "{\"error\":\"DELETE requires /tableName/id\"}");
+            return;
+        }
+
+        TableName table = TableName.fromPath(parts[1]);
+
+        if (table == null) {
+            sendJson(http, 404, "{\"error\":\"Unknown table\"}");
+            return;
+        }
+
+        String pk = table.primaryKey();
+
+        if (pk == null) {
+            sendJson(http, 400, "{\"error\":\"Composite PK tables not supported for DELETE\"}");
+            return;
+        }
+
+        String id = parts[2];
+
+        String url = "jdbc:mysql://localhost:3306/TutorSystem";
+        String user = "root";
+        String password = System.getenv("DB_PASSWORD");
+
+        String sql = "DELETE FROM " + table + " WHERE " + pk + " = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setObject(1, id);
+
+            int affected = stmt.executeUpdate();
+
+            if (affected == 0) {
+                sendJson(http, 404, "{\"message\":\"No row found to delete\"}");
+            } else {
+                sendJson(http, 200, "{\"message\":\"Row deleted\", \"affectedRows\":" + affected + "}");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendJson(http, 500, "{\"error\":\"Delete failed\"}");
+        }
+    }
     private void handlePost(HttpExchange http) {
     String path = http.getRequestURI().getPath();
     String[] parts = path.split("/");
